@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="windows-1251"?>
+
+<string_table>
+  <string id="msg_cordon_truce_stopped">
+    <text>The Cordon truce between Loners and Army has been stopped due to an attack by %s (%s).</text>
+  </string>
+  <string id="msg_cordon_truce_resumed">
+    <text>The Cordon truce between Loners and Army has resumed.</text>
+  </string>
+</string_table>
