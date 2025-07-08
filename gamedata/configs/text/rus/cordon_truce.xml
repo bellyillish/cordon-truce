@@ -2,9 +2,9 @@
 
 <string_table>
   <string id="msg_cordon_truce_stopped">
-    <text>The Cordon truce between Loners and Army has been stopped due to an attack by %s (%s).</text>
+    <text>Перемирие между военными и одиночками на Кордоне прекращено из-за нападения со стороны %s (%s).</text>
   </string>
   <string id="msg_cordon_truce_resumed">
-    <text>The Cordon truce between Loners and Army has resumed.</text>
+    <text>Перемирие на Кордоне между одиночками и военными восстановленно.</text>
   </string>
 </string_table>

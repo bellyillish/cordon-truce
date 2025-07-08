@@ -80,34 +80,24 @@ STATE = {
 
 -- CALLBACKS --
   function onEvalEnemy(npc, enemy, flags)
-    if not isArmyLonerCordon(npc, enemy) then
-      return
-    end
-
-    if STATE.stopTruce then
+    if not isArmyLonerCordon(npc, enemy) or STATE.stopTruce then
       return
     end
 
     local standoff = STATE.standoffs[npc:id()]
     local cooldown = STATE.cooldowns[npc:id()]
-    local distance = getDistance(npc, enemy)
 
-    if distance > CONFIG.warnDistance then
+    local standoffEnemy = getStandoffEnemy(npc)
+    local standoffDist  = getDistance(npc, standoffEnemy)
+    local distance      = getDistance(npc, enemy)
+
+
+    if standoffDist and standoffDist > CONFIG.warnDistance then
       standoff = nil
-    end
-
-    if standoff and standoff.expires < game.time() then
-      standoff = nil
-      cooldown = {id = enemy:id(), expires = game.time() + CONFIG.cooldownExpires}
-    end
-
-    if cooldown and cooldown.expires < game.time() then
       cooldown = nil
     end
 
     if distance <= CONFIG.warnDistance then
-      local standoffDist = getDistance(getStandoffEnemy(npc))
-
       local newStandoff = {
         expires = standoff and standoff.expires or game.time() + CONFIG.standoffExpires,
         fire    = distance <= CONFIG.fireDistance,
@@ -176,7 +166,8 @@ STATE = {
       if not (npc and npc:alive() and enemy and enemy:alive()) then
         STATE.standoffs[id] = nil
       elseif standoff.expires < game.time() then
-        STATE.standoffs[id] = nil
+       STATE.cooldowns[id] = {id = enemy:id(), expires = game.time() + CONFIG.cooldownExpires}
+       STATE.standoffs[id] = nil
       end
     end
 
@@ -194,12 +185,12 @@ STATE = {
   end
 
   function onSaveState(mdata)
-    mdata.CORDON_TRUCE = STATE
+    -- mdata.CORDON_TRUCE = STATE
   end
 
   function onLoadState(mdata)
     if mdata.CORDON_TRUCE then
-      STATE = mdata.CORDON_TRUCE
+      -- STATE = mdata.CORDON_TRUCE
     end
   end
 
