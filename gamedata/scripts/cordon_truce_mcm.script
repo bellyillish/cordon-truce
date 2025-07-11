@@ -1,0 +1,61 @@
+package.path = package.path .. ";.\\gamedata\\scripts\\?.lua;..\\gamedata\\scripts\\?.lua;"
+
+local MCM      = require "cordon_truce.lib.mcm"
+local TRUCE    = require "cordon_truce.lib.truce"
+local DEFAULTS = dup_table(TRUCE.CONFIG)
+
+
+function on_mcm_load()
+  return {
+    id = "cordon_truce",
+    sh = true,
+    gr = {
+      MCM.getTitle({text = "ui_mcm_cordon_truce_title"}),
+      MCM.getNote({text = "ui_mcm_cordon_truce_time_note", clr = {255, 200, 175, 75}}),
+      MCM.getSubtitle({text = "ui_mcm_cordon_truce_subtitle_warn"}),
+      MCM.getCheckboxField({id = "companionsWarn", def = false}),
+
+      MCM.getTrackField({
+        id   = "warnTime",
+        def  = DEFAULTS.warnTime / 1000,
+        max  = 3600,
+        step = 30,
+      }),
+
+      MCM.getTrackField({
+        id   = "ignoreTime",
+        def  = DEFAULTS.ignoreTime / 1000,
+        max  = 3600,
+        step = 30,
+      }),
+
+      MCM.getTrackField({
+        id  = "warnDist",
+        def = DEFAULTS.warnDist,
+        max = 64,
+      }),
+
+      MCM.getTrackField({
+        id  = "attackDist",
+        def = DEFAULTS.attackDist,
+        max = 64,
+      }),
+
+      MCM.getLine(),
+      MCM.getSubtitle({text = "ui_mcm_cordon_truce_subtitle_truce"}),
+      MCM.getCheckboxField({id = "tooCloseSuspends", def = false}),
+
+      MCM.getTrackField({
+        id   = "suspendTime",
+        def  = DEFAULTS.suspendTime / 1000,
+        max  = 24 * 3600,
+        step = 180,
+      }),
+
+      MCM.getLine(),
+      MCM.getSubtitle({text = "ui_mcm_cordon_truce_subtitle_key"}),
+      MCM.getKeybindKey({ id = "key",  hint = "cordon_truce_key"}),
+      MCM.getKeybindMod({ id = "mod",  hint = "cordon_truce_mod"}),
+    }
+  }
+end
