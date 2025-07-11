@@ -1,0 +1,209 @@
+package.path = package.path .. ";.\\gamedata\\scripts\\?.lua;..\\gamedata\\scripts\\?.lua;"
+
+local WP     = world_property
+local MCM    = require "cordon_truce.lib.mcm"
+local NPC    = require "cordon_truce.lib.npc"
+local TABLE  = require "cordon_truce.lib.table"
+local UTIL   = require "cordon_truce.lib.util"
+local VEC    = require "cordon_truce.lib.vector"
+local TRUCE  = require "cordon_truce.lib.truce"
+
+EVAL_ID   = 188220
+ACTION_ID = 188220
+
+
+-- EVALUATOR --
+class "evaluator_cordon_truce" (property_evaluator)
+
+
+function evaluator_cordon_truce:__init(name, storage) super (nil, name)
+  self.st = storage
+end
+
+
+function evaluator_cordon_truce:evaluate()
+  local npc = self.object
+  local st  = self.st
+
+  if NPC.isCompanion(npc) and not TRUCE.CONFIG.companionsWarn then
+    self.st = {}
+    return false
+  end
+
+  if not TRUCE.participant(npc) or TRUCE.SUSPENDED then
+    self.st = {}
+    return false
+  end
+
+  if not st.closest or not st.dist then
+    return false
+  end
+
+  if st.dist < TRUCE.CONFIG.attackDist then
+    st.action = "attack"
+    st.time   = nil
+
+  elseif st.action == "attack" and st.dist < TRUCE.CONFIG.warnDist then
+    st.time = nil
+
+  elseif st.action == "ignore" then
+    if UTIL.gtimeExpired(st.time) or st.closest == 0 then
+      st.action = nil
+      st.time   = nil
+    end
+
+  elseif st.action == "retreat" then
+    if st.closest == 0 then
+      st.action = nil
+      st.time   = nil
+    elseif UTIL.gtimeExpired(st.time) then
+      st.action = "ignore"
+      st.time = UTIL.gtimePlus(TRUCE.CONFIG.ignoreTime)
+    end
+
+  elseif st.action == "warn" and UTIL.gtimeExpired(st.time) then
+    st.action = "retreat"
+    st.time = UTIL.gtimePlus(TRUCE.CONFIG.retreatTime)
+
+  elseif (not st.action or st.closest == 0) and st.dist < TRUCE.CONFIG.warnDist then
+    st.action = "warn"
+    st.time = st.closest == 0 and nil or UTIL.gtimePlus(TRUCE.CONFIG.warnTime)
+
+  elseif st.dist > TRUCE.CONFIG.warnDist then
+    st.action = nil
+    st.time   = nil
+  end
+
+  if not st.squad then
+    st.status = st.action
+  end
+
+  if st.lastStatus ~= st.status or UTIL.timeExpired(st.expires) then
+    st.vid     = nil
+    st.expires = nil
+  end
+
+  return st.status == "warn" or st.status == "retreat"
+end
+
+
+-- ACTION --
+class "action_cordon_truce" (action_base)
+
+
+function action_cordon_truce:__init(name, storage) super(nil, name)
+  self.st = storage
+end
+
+
+function action_cordon_truce:execute()
+  action_base.execute(self)
+
+  local st       = self.st
+  local npc      = self.object
+  local enemy    = NPC.get(st.closest)
+  local retreat  = NPC.community(npc) == TRUCE.COMMUNITIES[2]
+  local enemyDir = VEC.direction(npc:position(), enemy:position())
+
+  if not st.vid then
+    local pos = npc:position()
+
+    if st.status == "retreat" and retreat then
+      local dir  = VEC.rotate(enemyDir, UTIL.random(120, 210))
+      local dist = UTIL.random(TRUCE.CONFIG.warnDist / 2, TRUCE.CONFIG.warnDist)
+      pos = VEC.offset(npc:position(), dir, dist)
+    end
+
+    st.vid = VEC.legacyUnclaimedLVID(npc, npc:position(), pos, 3)
+    st.expires = nil
+  end
+
+  if not VEC.isValidLVID(npc, st.vid) then
+    st.vid = npc:level_vertex_id()
+    st.expires = UTIL.timePlus(1000)
+  end
+
+  VEC.setLVID(npc, st.vid)
+
+  local look = {look_dir = enemyDir}
+  local move = npc:level_vertex_id() == st.vid
+    and "threat"
+    or  "raid"
+
+  state_mgr.set_state(npc, move, nil, nil, look, {fast_set = true})
+
+  st.lastStatus = st.status
+  st.lastAction = st.action
+end
+
+
+-- SETUP --
+function setup_generic_scheme(npc, ini, scheme, section, stype, temp)
+  xr_logic.assign_storage_and_bind(npc, ini, "cordon_truce", section, temp)
+end
+
+
+function add_to_binder(npc, ini, scheme, section, storage, temp)
+  local manager = npc:motivation_action_manager()
+  manager:add_evaluator(EVAL_ID, evaluator_cordon_truce("cordon_truce", storage))
+
+  temp.action = action_cordon_truce("cordon_truce", storage)
+
+  if temp.action then
+    temp.action:add_precondition(WP(stalker_ids.property_alive, true))
+    temp.action:add_precondition(WP(stalker_ids.property_danger, false))
+    temp.action:add_precondition(WP(stalker_ids.property_enemy, false))
+    temp.action:add_precondition(WP(xr_evaluators_id.sidor_wounded_base, false))
+    temp.action:add_precondition(WP(EVAL_ID, true))
+    temp.action:add_effect(WP(EVAL_ID, false))
+    manager:add_action(ACTION_ID, temp.action)
+  end
+end
+
+
+function configure_actions(npc, ini, scheme, section, stype, temp)
+  local manager = npc:motivation_action_manager()
+
+  local otherActions = {xr_actions_id.state_mgr + 2, xr_actions_id.alife}
+
+  for i, id in ipairs(otherActions) do
+    local action = manager:action(id)
+    if action then
+      action:add_precondition(WP(EVAL_ID, false))
+    end
+  end
+end
+
+
+function disable_generic_scheme(npc, scheme, stype)
+  local st = db.storage[npc:id()][scheme]
+  if st then
+    st.enabled = false
+  end
+end
+
+
+function npc_add_precondition(action)
+  action:add_precondition(world_property(EVAL_ID, false))
+end
+
+
+-- LOAD --
+LoadScheme("cordon_truce", "cordon_truce", modules.stype_stalker)
+
+
+-- CALLBACKS --
+function on_game_start()
+  RegisterScriptCallback("actor_on_update",         TRUCE.onCheckTruceTime)
+  RegisterScriptCallback("npc_on_update",           TRUCE.onUpdateNPC)
+  RegisterScriptCallback("squad_on_update",         TRUCE.onUpdateSquad)
+  RegisterScriptCallback("npc_on_hit_callback",     TRUCE.onUpdateTruce)
+  RegisterScriptCallback("on_enemy_eval",           TRUCE.onUpdateEnemy)
+  RegisterScriptCallback("on_key_press",            TRUCE.onCheckTruceKey)
+  RegisterScriptCallback("mcm_option_change",       TRUCE.onConfigure)
+  RegisterScriptCallback("save_state",              TRUCE.onSaveState)
+  RegisterScriptCallback("load_state",              TRUCE.onLoadState)
+  RegisterScriptCallback("on_cordon_truce_suspend", TRUCE.onSuspend)
+  RegisterScriptCallback("on_cordon_truce_resume",  TRUCE.onResume)
+  TRUCE.onConfigure()
+end

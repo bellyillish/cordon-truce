@@ -1,10 +1,135 @@
 <?xml version="1.0" encoding="windows-1251"?>
 
 <string_table>
-  <string id="msg_cordon_truce_stopped">
+  <string id="msg_cordon_truce_suspended">
     <text>The Cordon truce between Loners and Army has been stopped due to an attack by %s (%s).</text>
   </string>
+
   <string id="msg_cordon_truce_resumed">
     <text>The Cordon truce between Loners and Army has resumed.</text>
+  </string>
+
+  <string id="msg_cordon_check_truce_active">
+    <text>The Cordon truce between Loners and Army is currently in place.</text>
+  </string>
+
+  <string id="msg_cordon_check_truce_suspended">
+    <text>The Cordon truce between Loners and Army is suspended for another %s %s.</text>
+  </string>
+
+  <string id="msg_cordon_check_truce_hours">
+    <text>hour(s)</text>
+  </string>
+
+  <string id="msg_cordon_check_truce_mins">
+    <text>minute(s)</text>
+  </string>
+
+  <string id="msg_cordon_check_truce_secs">
+    <text>second(s)</text>
+  </string>
+
+  <string id="ui_mcm_menu_cordon_truce">
+    <text>Cordon Truce</text>
+  </string>
+
+  <string id="ui_mcm_cordon_truce_title">
+    <text>Options for Cordon Truce</text>
+  </string>
+
+  <string id="ui_mcm_cordon_truce_subtitle_warn">
+    <text>Warn Options</text>
+  </string>
+
+  <string id="ui_mcm_cordon_truce_companionsWarn">
+    <text>Companions Also Warn</text>
+  </string>
+
+  <string id="ui_mcm_cordon_truce_companionsWarn_desc">
+    <text>If enabled companions will also halt and stand off against their truce counterparts. Otherwise they will ignore them until within firing distance.</text>
+  </string>
+
+  <string id="ui_mcm_cordon_truce_warnTime">
+    <text>Warn Duration</text>
+  </string>
+
+  <string id="ui_mcm_cordon_truce_warnTime_desc">
+    <text>The max amount of time that NPCs will stand off against their truce counterparts before ignoring them and moving on. Setting this to 0 will disable stand offs entirely for everyone.</text>
+  </string>
+
+  <string id="ui_mcm_cordon_truce_ignoreTime">
+    <text>Ignore Time</text>
+  </string>
+
+  <string id="ui_mcm_cordon_truce_ignoreTime_desc">
+    <text>The amount to time that must pass before NPCs stand off against anyone else after ending a stand off and moving on.</text>
+  </string>
+
+  <string id="ui_mcm_cordon_truce_warnDist">
+    <text>Warn Distance</text>
+  </string>
+
+  <string id="ui_mcm_cordon_truce_warnDist_desc">
+    <text>The minimum distance NPCs with a truce can be from each other before standing off.</text>
+  </string>
+
+  <string id="ui_mcm_cordon_truce_attackDist">
+    <text>Attack Distance</text>
+  </string>
+
+  <string id="ui_mcm_cordon_truce_attackDist_desc">
+    <text>The minimum distance NPCs with a truce can be from each other before firing upon each other.</text>
+  </string>
+
+  <string id="ui_mcm_cordon_truce_subtitle_truce">
+    <text>Truce Options</text>
+  </string>
+
+  <string id="ui_mcm_cordon_truce_tooCloseSuspends">
+    <text>Being Too Close Suspends Truce</text>
+  </string>
+
+  <string id="ui_mcm_cordon_truce_tooCloseSuspends_desc">
+    <text>Whether NPCs shooting each other over distance disputes constitutes a truce suspension.</text>
+  </string>
+
+  <string id="ui_mcm_cordon_truce_suspendTime">
+    <text>Truce Suspend Time</text>
+  </string>
+
+  <string id="ui_mcm_cordon_truce_suspendTime_desc">
+    <text>How long broken truces stay suspended before resuming.</text>
+  </string>
+
+  <string id="ui_mcm_cordon_truce_time_note">
+    <text>NOTE: Options are in seconds of game time (which is about 1/6 of real time).</text>
+  </string>
+
+  <string id="ui_mcm_cordon_truce_subtitle_key">
+    <text>Check Truce Keybind</text>
+  </string>
+
+  <string id="ui_mcm_cordon_truce_key">
+    <text>Key</text>
+  </string>
+
+  <string id="ui_mcm_cordon_truce_mod">
+    <text>Modifier</text>
+  </string>
+
+  <string id="ui_mcm_lst_mod_none">
+    <text>None</text>
+  </string>
+
+  <string id="ui_mcm_lst_mod_shift">
+    <text>SHIFT</text>
+  </string>
+
+  <string id="ui_mcm_lst_mod_ctrl">
+    <text>CTRL</text>
+  </string>
+
+  <string id="ui_mcm_lst_mod_alt">
+    <text>ALT</text>
   </string>
 </string_table>
